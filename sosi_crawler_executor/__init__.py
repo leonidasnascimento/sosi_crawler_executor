@@ -1,0 +1,1 @@
+from sosi_crawler_executor.crawler import Executor

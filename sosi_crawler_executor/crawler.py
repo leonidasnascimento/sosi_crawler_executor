@@ -55,19 +55,19 @@ class Executor():
         self.__exception = self.__object_factory.GetInstance(self.__EXCEPTION_OBJ_NAME, IException)
         self.__logging = self.__object_factory.GetInstance(self.__LOGGING_OBJ_NAME, ILogging)
 
-        self.check_concrete_object_is_none(self.__exception, "IException")
-        self.check_concrete_object_is_none(self.__crawler, "ICrawler")
-        self.check_concrete_object_is_none(self.__logging, "ILogging")
-        self.check_concrete_object_is_none(self.__crawling_result, "ICrawlingResult")
-        self.check_concrete_object_is_none(self.__configuration, "IConfiguration")
-        self.check_concrete_object_is_none(self.__api_controller, "IApiController")
+        self.check_concrete_object_is_none(self.__exception, type(IException).__class__.__name__)
+        self.check_concrete_object_is_none(self.__crawler, type(ICrawler).__class__.__name__)
+        self.check_concrete_object_is_none(self.__logging, type(ILogging).__class__.__name__)
+        self.check_concrete_object_is_none(self.__crawling_result, type(ICrawlingResult).__class__.__name__)
+        self.check_concrete_object_is_none(self.__configuration, type(IConfiguration).__class__.__name__)
+        self.check_concrete_object_is_none(self.__api_controller, type(IApiController).__class__.__name__)
 
-        self.__logging.Log(self.__LOADED_OBJECT_MSG.format(type(self.__crawler), type(ICrawler)))
-        self.__logging.Log(self.__LOADED_OBJECT_MSG.format(type(self.__api_controller), type(IApiController)))
-        self.__logging.Log(self.__LOADED_OBJECT_MSG.format(type(self.__configuration), type(IConfiguration)))
-        self.__logging.Log(self.__LOADED_OBJECT_MSG.format(type(self.__crawling_result), type(ICrawlingResult)))
-        self.__logging.Log(self.__LOADED_OBJECT_MSG.format(type(self.__exception), type(IException)))
-        self.__logging.Log(self.__LOADED_OBJECT_MSG.format(type(self.__logging), type(ILogging)))
+        self.__logging.Log(self.__LOADED_OBJECT_MSG.format(type(self.__crawler), type(ICrawler).__class__.__name__))
+        self.__logging.Log(self.__LOADED_OBJECT_MSG.format(type(self.__api_controller), type(IApiController).__class__.__name__))
+        self.__logging.Log(self.__LOADED_OBJECT_MSG.format(type(self.__configuration), type(IConfiguration).__class__.__name__))
+        self.__logging.Log(self.__LOADED_OBJECT_MSG.format(type(self.__crawling_result), type(ICrawlingResult).__class__.__name__))
+        self.__logging.Log(self.__LOADED_OBJECT_MSG.format(type(self.__exception), type(IException).__class__.__name__))
+        self.__logging.Log(self.__LOADED_OBJECT_MSG.format(type(self.__logging), type(ILogging).__class__.__name__))
 
     def execute(self):
         try:
@@ -103,7 +103,7 @@ class Executor():
             raise Exception(self.__CONCRETE_OBJ_REQUIRED.format(expected_type_name))
             pass
         elif (concrete_obj is None):
-            self.__exception.ManageException(self.__CONCRETE_OBJ_REQUIRED.format(expected_type_name))
+            self.__exception.ManageException(self.__CONCRETE_OBJ_REQUIRED.format(expected_type_name), True)
             pass
         pass
     pass

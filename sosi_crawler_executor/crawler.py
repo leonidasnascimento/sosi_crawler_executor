@@ -21,7 +21,6 @@ class Executor():
     __crawling_result: ICrawlingResult = None
     __exception: IException = None
     __logging: ILogging = None
-    __dep_file_path: str = ''
     __crawler_config_file_path: str = ''
 
     ## Constant Values
@@ -31,27 +30,29 @@ class Executor():
     __CRAWLING_RESULT_OBJ_NAME: str = 'concreteCrawlingResult'
     __EXCEPTION_OBJ_NAME: str = 'concreteException'
     __LOGGING_OBJ_NAME: str = 'concreteLogging'
-    __OBJECT_FACTORY_OBJ_NAME: str = 'concreteObjectFactory'
     __LOADED_OBJECT_MSG: str = 'Object "{0}" loaded for "{1}"'
     __CONCRETE_OBJ_REQUIRED: str = 'A concrete object for "{0}" is required. This crawler cannot run'
+    __PARAM_MUST_BE_PROVIDED: str = 'The param "{0}" must be provided'
 
     def __init__(self, dependecies_file_path: str, crawler_config_file_path: str):
+        """
+
+        """
+                
         super().__init__()
         
         if (dependecies_file_path is None or dependecies_file_path == '') or (crawler_config_file_path is None or crawler_config_file_path == ''):
-            raise Exception("Path to dependencies and configuration files is required")
-            pass
+            raise FileNotFoundError("Path to dependencies and configuration files is required")
 
-        self.__dep_file_path = dependecies_file_path
         self.__crawler_config_file_path = crawler_config_file_path
 
         self.__object_factory = ObjectFactory()
-        self.__object_factory.LoadDependencies('')
+        self.__object_factory.LoadDependencies(dependecies_file_path)
 
         self.__crawler = self.__object_factory.GetInstance(self.__CRAWLER_OBJ_NAME, ICrawler)
-        self.__apiController = self.__object_factory.GetInstance(self.__API_CONTROLLER_OBJ_NAME, IApiController)
+        self.__api_controller = self.__object_factory.GetInstance(self.__API_CONTROLLER_OBJ_NAME, IApiController)
         self.__configuration = self.__object_factory.GetInstance(self.__CONFIGURATION_OBJ_NAME, IConfiguration)
-        self.__crawlingResult = self.__object_factory.GetInstance(self.__CRAWLING_RESULT_OBJ_NAME, ICrawlingResult)
+        self.__crawling_result = self.__object_factory.GetInstance(self.__CRAWLING_RESULT_OBJ_NAME, ICrawlingResult)
         self.__exception = self.__object_factory.GetInstance(self.__EXCEPTION_OBJ_NAME, IException)
         self.__logging = self.__object_factory.GetInstance(self.__LOGGING_OBJ_NAME, ILogging)
 
@@ -70,40 +71,46 @@ class Executor():
         self.__logging.Log(self.__LOADED_OBJECT_MSG.format(type(self.__logging), type(ILogging).__class__.__name__))
 
     def execute(self):
+        """
+
+        """
+           
         try:
-            self.__configuration.Load('FILE_PATH', 'SECTION_NAME')
+            self.__configuration.Load(self.__crawler_config_file_path, 'SECTION_NAME')
             destination_url: str = self.__configuration.Read('FIELD_URL')
             crawling_args: dict = self.__configuration.Read('FIELD_ARGS')
+            post_service_header: dict = self.__configuration.Read('FIELD_HEAD')
+            post_service_ext_params: dict = self.__configuration.Read('FIELD_EXT_PARAMS')
+
+            if destination_url is None or destination_url == '':
+                self.__exception.ManageException(self.__PARAM_MUST_BE_PROVIDED.format('destination_url'), True)
+            
+            if crawling_args is None or crawling_args == '':
+                self.__exception.ManageException(self.__PARAM_MUST_BE_PROVIDED.format('crawling_args'), True)
+            
+            if post_service_header is None or post_service_header == '':
+                self.__exception.ManageException(self.__PARAM_MUST_BE_PROVIDED.format('post_service_header'), True)
 
             self.__logging.Log("Crawling has started")
             result: ICrawlingResult = self.__crawler.Execute(crawling_args)
             
             if result is None:
-                raise Exception("Crawling result cannot be null")
-                pass
-            
+                self.__exception.ManageException("Crawling result cannot be null", True)
+                            
             result_obj: dict = result.GetObject()
 
             if result_obj is None:
-                raise Exception("Crawling result object cannot be null")
-                pass
-
-            self.__logging.Log("Sending crawling result to destination URL")
-            self.__api_controller.PostAssync('URL', 'HEAD', )
+                self.__exception.ManageException("Crawling result object cannot be null", True)
+                
+            self.__logging.Log("Posting result to {0}".format(destination_url))
+            self.__api_controller.PostAsync(destination_url, post_service_header, result_obj, post_service_ext_params)
 
             self.__logging.Log("DONE HERE! :)")
-            pass
         except Exception as ex:
-            
-            pass
-        pass
+            self.__exception.ManageException(ex)
 
     def check_concrete_object_is_none(self, concrete_obj: object, expected_type_name: str):
         if (concrete_obj is None) and (self.__exception is None):
-            raise Exception(self.__CONCRETE_OBJ_REQUIRED.format(expected_type_name))
-            pass
+            raise ValueError(expected_type_name)
         elif (concrete_obj is None):
             self.__exception.ManageException(self.__CONCRETE_OBJ_REQUIRED.format(expected_type_name), True)
-            pass
-        pass
-    pass

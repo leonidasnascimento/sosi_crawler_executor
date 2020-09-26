@@ -47,21 +47,21 @@ class Executor():
         self.__crawler_config_file_path = crawler_config_file_path
 
         self.__object_factory = ObjectFactory()
-        self.__object_factory.LoadDependencies(dependecies_file_path)
+        self.__object_factory.load_dependencies(dependecies_file_path)
 
-        self.__crawler = self.__object_factory.GetInstance(self.__CRAWLER_OBJ_NAME, ICrawler)
-        self.__api_controller = self.__object_factory.GetInstance(self.__API_CONTROLLER_OBJ_NAME, IApiController)
-        self.__configuration = self.__object_factory.GetInstance(self.__CONFIGURATION_OBJ_NAME, IConfiguration)
-        self.__crawling_result = self.__object_factory.GetInstance(self.__CRAWLING_RESULT_OBJ_NAME, ICrawlingResult)
-        self.__exception = self.__object_factory.GetInstance(self.__EXCEPTION_OBJ_NAME, IException)
-        self.__logging = self.__object_factory.GetInstance(self.__LOGGING_OBJ_NAME, ILogging)
+        self.__crawler = self.__object_factory.get_instance(self.__CRAWLER_OBJ_NAME, ICrawler)
+        self.__api_controller = self.__object_factory.get_instance(self.__API_CONTROLLER_OBJ_NAME, IApiController)
+        self.__configuration = self.__object_factory.get_instance(self.__CONFIGURATION_OBJ_NAME, IConfiguration)
+        self.__crawling_result = self.__object_factory.get_instance(self.__CRAWLING_RESULT_OBJ_NAME, ICrawlingResult)
+        self.__exception = self.__object_factory.get_instance(self.__EXCEPTION_OBJ_NAME, IException)
+        self.__logging = self.__object_factory.get_instance(self.__LOGGING_OBJ_NAME, ILogging)
 
-        self.check_concrete_object_is_none(self.__exception, type(IException).__class__.__name__)
-        self.check_concrete_object_is_none(self.__crawler, type(ICrawler).__class__.__name__)
-        self.check_concrete_object_is_none(self.__logging, type(ILogging).__class__.__name__)
-        self.check_concrete_object_is_none(self.__crawling_result, type(ICrawlingResult).__class__.__name__)
-        self.check_concrete_object_is_none(self.__configuration, type(IConfiguration).__class__.__name__)
-        self.check_concrete_object_is_none(self.__api_controller, type(IApiController).__class__.__name__)
+        self.__check_concrete_obj_is_none(self.__exception, type(IException).__class__.__name__)
+        self.__check_concrete_obj_is_none(self.__crawler, type(ICrawler).__class__.__name__)
+        self.__check_concrete_obj_is_none(self.__logging, type(ILogging).__class__.__name__)
+        self.__check_concrete_obj_is_none(self.__crawling_result, type(ICrawlingResult).__class__.__name__)
+        self.__check_concrete_obj_is_none(self.__configuration, type(IConfiguration).__class__.__name__)
+        self.__check_concrete_obj_is_none(self.__api_controller, type(IApiController).__class__.__name__)
 
         self.__logging.Log(self.__LOADED_OBJECT_MSG.format(type(self.__crawler), type(ICrawler).__class__.__name__))
         self.__logging.Log(self.__LOADED_OBJECT_MSG.format(type(self.__api_controller), type(IApiController).__class__.__name__))
@@ -77,19 +77,19 @@ class Executor():
            
         try:
             self.__configuration.Load(self.__crawler_config_file_path, 'SECTION_NAME')
-            destination_url: str = self.__configuration.Read('FIELD_URL')
-            crawling_args: dict = self.__configuration.Read('FIELD_ARGS')
-            post_service_header: dict = self.__configuration.Read('FIELD_HEAD')
-            post_service_ext_params: dict = self.__configuration.Read('FIELD_EXT_PARAMS')
+            destination_url: str = self.__configuration.read('FIELD_URL')
+            crawling_args: dict = self.__configuration.read('FIELD_ARGS')
+            post_service_header: dict = self.__configuration.read('FIELD_HEAD')
+            post_service_ext_params: dict = self.__configuration.read('FIELD_EXT_PARAMS')
 
             if destination_url is None or destination_url == '':
-                self.__exception.ManageException(self.__PARAM_MUST_BE_PROVIDED.format('destination_url'), True)
+                self.__exception.ManageException(self.__PARAM_MUST_BE_PROVIDED.format('FIELD_URL'), True)
             
             if crawling_args is None or crawling_args == '':
-                self.__exception.ManageException(self.__PARAM_MUST_BE_PROVIDED.format('crawling_args'), True)
+                self.__exception.ManageException(self.__PARAM_MUST_BE_PROVIDED.format('FIELD_ARGS'), True)
             
             if post_service_header is None or post_service_header == '':
-                self.__exception.ManageException(self.__PARAM_MUST_BE_PROVIDED.format('post_service_header'), True)
+                self.__exception.ManageException(self.__PARAM_MUST_BE_PROVIDED.format('FIELD_HEAD'), True)
 
             self.__logging.Log("Crawling has started")
             result: ICrawlingResult = self.__crawler.Execute(crawling_args)
@@ -109,7 +109,11 @@ class Executor():
         except Exception as ex:
             self.__exception.ManageException(ex)
 
-    def check_concrete_object_is_none(self, concrete_obj: object, expected_type_name: str):
+    def __check_concrete_obj_is_none(self, concrete_obj: object, expected_type_name: str):
+        """
+
+        """
+           
         if (concrete_obj is None) and (self.__exception is None):
             raise ValueError(expected_type_name)
         elif (concrete_obj is None):

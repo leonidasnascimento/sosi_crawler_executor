@@ -76,38 +76,38 @@ class Executor():
         """
            
         try:
-            self.__configuration.Load(self.__crawler_config_file_path, 'SECTION_NAME')
+            self.__configuration.load(self.__crawler_config_file_path, 'SECTION_NAME')
             destination_url: str = self.__configuration.read('FIELD_URL')
             crawling_args: dict = self.__configuration.read('FIELD_ARGS')
             post_service_header: dict = self.__configuration.read('FIELD_HEAD')
             post_service_ext_params: dict = self.__configuration.read('FIELD_EXT_PARAMS')
 
             if destination_url is None or destination_url == '':
-                self.__exception.ManageException(self.__PARAM_MUST_BE_PROVIDED.format('FIELD_URL'), True)
+                self.__exception.manage_exception(self.__PARAM_MUST_BE_PROVIDED.format('FIELD_URL'), True)
             
             if crawling_args is None or crawling_args == '':
-                self.__exception.ManageException(self.__PARAM_MUST_BE_PROVIDED.format('FIELD_ARGS'), True)
+                self.__exception.manage_exception(self.__PARAM_MUST_BE_PROVIDED.format('FIELD_ARGS'), True)
             
             if post_service_header is None or post_service_header == '':
-                self.__exception.ManageException(self.__PARAM_MUST_BE_PROVIDED.format('FIELD_HEAD'), True)
+                self.__exception.manage_exception(self.__PARAM_MUST_BE_PROVIDED.format('FIELD_HEAD'), True)
 
             self.__logging.Log("Crawling has started")
-            result: ICrawlingResult = self.__crawler.Execute(crawling_args)
+            result: ICrawlingResult = self.__crawler.execute(crawling_args)
             
             if result is None:
-                self.__exception.ManageException("Crawling result cannot be null", True)
+                self.__exception.manage_exception("Crawling result cannot be null", True)
                             
-            result_obj: dict = result.GetObject()
+            result_obj: dict = result.get_object()
 
             if result_obj is None:
-                self.__exception.ManageException("Crawling result object cannot be null", True)
+                self.__exception.manage_exception("Crawling result object cannot be null", True)
                 
             self.__logging.Log("Posting result to {0}".format(destination_url))
-            self.__api_controller.PostAsync(destination_url, post_service_header, result_obj, post_service_ext_params)
+            self.__api_controller.post(destination_url, post_service_header, result_obj, post_service_ext_params)
 
-            self.__logging.Log("DONE HERE! :)")
+            self.__logging.log("DONE HERE! :)")
         except Exception as ex:
-            self.__exception.ManageException(ex)
+            self.__exception.manage_exception(ex)
 
     def __check_concrete_obj_is_none(self, concrete_obj: object, expected_type_name: str):
         """
@@ -117,4 +117,6 @@ class Executor():
         if (concrete_obj is None) and (self.__exception is None):
             raise ValueError(expected_type_name)
         elif (concrete_obj is None):
-            self.__exception.ManageException(self.__CONCRETE_OBJ_REQUIRED.format(expected_type_name), True)
+            self.__exception.manage_exception(self.__CONCRETE_OBJ_REQUIRED.format(expected_type_name), True)
+        else:
+            return

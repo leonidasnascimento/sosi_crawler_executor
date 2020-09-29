@@ -2,5 +2,15 @@
     "python.linting.pylintEnabled": true,
     "python.linting.enabled": true,
     "sonarlint.ls.javaHome": "C:\\Program Files (x86)\\Java\\jre1.8.0_261",
-    "sonarlint.testFilePattern": "{**/test/**,**/*test*,**/*Test*}"
+    "sonarlint.testFilePattern": "{**/test/**,**/*test*,**/*Test*}",
+    "python.testing.unittestArgs": [
+        "-v",
+        "-s",
+        "./tests",
+        "-p",
+        "test*.py"
+    ],
+    "python.testing.pytestEnabled": false,
+    "python.testing.nosetestsEnabled": false,
+    "python.testing.unittestEnabled": true
 }

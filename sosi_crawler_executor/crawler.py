@@ -9,7 +9,8 @@ from sosi_crawler_object_factory.factory import ObjectFactory
 
 class Executor():
     """
-
+    Class representing a crawler executor. 
+    This class is responsible to handle all duties in terms of crawler's pre- & post-execution  
     """
 
     ## Global variables
@@ -30,19 +31,30 @@ class Executor():
     __CRAWLING_RESULT_OBJ_NAME: str = 'concreteCrawlingResult'
     __EXCEPTION_OBJ_NAME: str = 'concreteException'
     __LOGGING_OBJ_NAME: str = 'concreteLogging'
-    __LOADED_OBJECT_MSG: str = 'Object "{0}" loaded for "{1}"'
-    __CONCRETE_OBJ_REQUIRED: str = 'A concrete object for "{0}" is required. This crawler cannot run'
-    __PARAM_MUST_BE_PROVIDED: str = 'The param "{0}" must be provided'
+    __MSG_LOADED_OBJECT_MSG: str = 'Object "{0}" loaded for "{1}"'
+    __MSG_CONCRETE_OBJ_REQUIRED: str = 'A concrete object for "{0}" is required. This crawler cannot run'
+    __MSG_PARAM_MUST_BE_PROVIDED: str = 'The param "{0}" must be provided'
+    __CONFIG_FILE_FIELD_CRAWLER: str = 'crawler'
+    __CONFIG_FILE_FIELD_DEST_URL: str = 'dest_url'
+    __CONFIG_FILE_FIELD_CRAWLER_ARGS: str = 'crawler_args'
+    __CONFIG_FILE_FIELD_CRAWLER_SERVICE_HEADER: str = 'service_header'
+    __CONFIG_FILE_FIELD_SERVICE_EXT_ARGS: str = 'service_extra_args'
+    __MSG_INIT_PARAMS_REQUIRED: str = 'Path to dependencies and configuration files is required'
 
     def __init__(self, dependecies_file_path: str, crawler_config_file_path: str):
         """
+        Class initializer
 
+        :param dependecies_file_path: Path to JSON file indicating the dependencies that should handle the tasks before and after the crawler execution
+        :param crawler_config_file_path: Path to JSON file that indicates the crawler configurations
+        :type dependecies_file_path: str
+        :type crawler_config_file_path: str     
         """
                 
         super().__init__()
         
         if (dependecies_file_path is None or dependecies_file_path == '') or (crawler_config_file_path is None or crawler_config_file_path == ''):
-            raise FileNotFoundError("Path to dependencies and configuration files is required")
+            raise FileNotFoundError(self.__MSG_INIT_PARAMS_REQUIRED)
 
         self.__crawler_config_file_path = crawler_config_file_path
 
@@ -63,33 +75,33 @@ class Executor():
         self.__check_concrete_obj_is_none(self.__configuration, type(IConfiguration).__class__.__name__)
         self.__check_concrete_obj_is_none(self.__api_controller, type(IApiController).__class__.__name__)
 
-        self.__logging.Log(self.__LOADED_OBJECT_MSG.format(type(self.__crawler), type(ICrawler).__class__.__name__))
-        self.__logging.Log(self.__LOADED_OBJECT_MSG.format(type(self.__api_controller), type(IApiController).__class__.__name__))
-        self.__logging.Log(self.__LOADED_OBJECT_MSG.format(type(self.__configuration), type(IConfiguration).__class__.__name__))
-        self.__logging.Log(self.__LOADED_OBJECT_MSG.format(type(self.__crawling_result), type(ICrawlingResult).__class__.__name__))
-        self.__logging.Log(self.__LOADED_OBJECT_MSG.format(type(self.__exception), type(IException).__class__.__name__))
-        self.__logging.Log(self.__LOADED_OBJECT_MSG.format(type(self.__logging), type(ILogging).__class__.__name__))
+        self.__logging.Log(self.__MSG_LOADED_OBJECT_MSG.format(type(self.__crawler), type(ICrawler).__class__.__name__))
+        self.__logging.Log(self.__MSG_LOADED_OBJECT_MSG.format(type(self.__api_controller), type(IApiController).__class__.__name__))
+        self.__logging.Log(self.__MSG_LOADED_OBJECT_MSG.format(type(self.__configuration), type(IConfiguration).__class__.__name__))
+        self.__logging.Log(self.__MSG_LOADED_OBJECT_MSG.format(type(self.__crawling_result), type(ICrawlingResult).__class__.__name__))
+        self.__logging.Log(self.__MSG_LOADED_OBJECT_MSG.format(type(self.__exception), type(IException).__class__.__name__))
+        self.__logging.Log(self.__MSG_LOADED_OBJECT_MSG.format(type(self.__logging), type(ILogging).__class__.__name__))
 
     def execute(self):
         """
-
+        Stats the crawling pipeline by runing the crawler
         """
            
         try:
-            self.__configuration.load(self.__crawler_config_file_path, 'SECTION_NAME')
-            destination_url: str = self.__configuration.read('FIELD_URL')
-            crawling_args: dict = self.__configuration.read('FIELD_ARGS')
-            post_service_header: dict = self.__configuration.read('FIELD_HEAD')
-            post_service_ext_params: dict = self.__configuration.read('FIELD_EXT_PARAMS')
+            self.__configuration.load(self.__crawler_config_file_path, self.__CONFIG_FILE_FIELD_CRAWLER)
+            destination_url: str = self.__configuration.read(self.__CONFIG_FILE_FIELD_DEST_URL)
+            crawling_args: dict = self.__configuration.read(self.__CONFIG_FILE_FIELD_CRAWLER_ARGS)
+            post_service_header: dict = self.__configuration.read(self.__CONFIG_FILE_FIELD_CRAWLER_SERVICE_HEADER)
+            post_service_ext_params: dict = self.__configuration.read(self.__CONFIG_FILE_FIELD_SERVICE_EXT_ARGS)
 
             if destination_url is None or destination_url == '':
-                self.__exception.manage_exception(self.__PARAM_MUST_BE_PROVIDED.format('FIELD_URL'), True)
+                self.__exception.manage_exception(self.__MSG_PARAM_MUST_BE_PROVIDED.format(self.__CONFIG_FILE_FIELD_DEST_URL), True)
             
             if crawling_args is None or crawling_args == '':
-                self.__exception.manage_exception(self.__PARAM_MUST_BE_PROVIDED.format('FIELD_ARGS'), True)
+                self.__exception.manage_exception(self.__MSG_PARAM_MUST_BE_PROVIDED.format(self.__CONFIG_FILE_FIELD_CRAWLER_ARGS), True)
             
             if post_service_header is None or post_service_header == '':
-                self.__exception.manage_exception(self.__PARAM_MUST_BE_PROVIDED.format('FIELD_HEAD'), True)
+                self.__exception.manage_exception(self.__MSG_PARAM_MUST_BE_PROVIDED.format(self.__CONFIG_FILE_FIELD_CRAWLER_SERVICE_HEADER), True)
 
             self.__logging.Log("Crawling has started")
             result: ICrawlingResult = self.__crawler.execute(crawling_args)
@@ -111,12 +123,17 @@ class Executor():
 
     def __check_concrete_obj_is_none(self, concrete_obj: object, expected_type_name: str):
         """
+        Checks whether a concrete object is None or not. In case it's None, an exception should be raised
 
+        :param concrete_obj: Concrete object
+        :param expected_type_name: Expected type 
+        :type concrete_obj: object
+        :type expected_type_name: str        
         """
            
         if (concrete_obj is None) and (self.__exception is None):
             raise ValueError(expected_type_name)
         elif (concrete_obj is None):
-            self.__exception.manage_exception(self.__CONCRETE_OBJ_REQUIRED.format(expected_type_name), True)
+            self.__exception.manage_exception(self.__MSG_CONCRETE_OBJ_REQUIRED.format(expected_type_name), True)
         else:
             return

@@ -1,0 +1,1 @@
+from tests.generic_exception import LogException

@@ -12,7 +12,9 @@ class test_executor_check_concrete_obj_is_none_method(unittest.TestCase):
         
         """
         try:
-            Executor('tests\\dependecies.json', 'crawler_obj').check_concrete_obj_is_none('Hello', type(str).__class__.__name__)
+            obj: Executor = Executor('tests\\dependecies.json', 'crawler_obj')
+            obj.check_concrete_obj_is_none('str_obj', type(str).__class__.__name__)
+            
             self.assertTrue(True)
             pass
         except Exception as ex:
@@ -26,7 +28,9 @@ class test_executor_check_concrete_obj_is_none_method(unittest.TestCase):
         
         """
         try:
-            Executor('tests\\dependecies.json', 'crawler_obj').check_concrete_obj_is_none(None, type(str).__class__.__name__)
+            obj: Executor = Executor('tests\\dependecies.json', 'crawler_obj')
+            obj.check_concrete_obj_is_none(None, type(str).__class__.__name__)
+
             self.assertTrue(True)
             pass
         except AttributeError:

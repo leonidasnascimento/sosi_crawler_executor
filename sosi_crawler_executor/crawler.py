@@ -49,7 +49,7 @@ class Executor():
         
         if (dependecies_file_path is None or dependecies_file_path == '') or (crawler_config_file_path is None or crawler_config_file_path == ''):
             raise FileNotFoundError(self.__MSG_INIT_PARAMS_REQUIRED)
-
+            
         self.__crawler_config_file_path = crawler_config_file_path
 
         self.__object_factory = ObjectFactory()

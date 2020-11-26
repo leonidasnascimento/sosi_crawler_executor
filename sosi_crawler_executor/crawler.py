@@ -70,10 +70,10 @@ class Executor():
         try:
             self.check_required_dependencies()
             self.__configuration.load(self.__crawler_config_file_path, self.__CONFIG_FILE_FIELD_CRAWLER)
-            destination_url: str = self.__configuration.read(self.__CONFIG_FILE_FIELD_DEST_URL)
-            crawling_args: dict = self.__configuration.read(self.__CONFIG_FILE_FIELD_CRAWLER_ARGS)
-            post_service_header: dict = self.__configuration.read(self.__CONFIG_FILE_FIELD_CRAWLER_SERVICE_HEADER)
-            post_service_ext_params: dict = self.__configuration.read(self.__CONFIG_FILE_FIELD_SERVICE_EXT_ARGS)
+            destination_url: str = self.__configuration.read(self.__CONFIG_FILE_FIELD_DEST_URL, None)
+            crawling_args: dict = self.__configuration.read(self.__CONFIG_FILE_FIELD_CRAWLER_ARGS, None)
+            post_service_header: dict = self.__configuration.read(self.__CONFIG_FILE_FIELD_CRAWLER_SERVICE_HEADER, None)
+            post_service_ext_params: dict = self.__configuration.read(self.__CONFIG_FILE_FIELD_SERVICE_EXT_ARGS, None)
 
             if destination_url is None or destination_url == '':
                 self.__exception.manage_exception(self.__MSG_PARAM_MUST_BE_PROVIDED.format(self.__CONFIG_FILE_FIELD_DEST_URL), True)
@@ -84,41 +84,45 @@ class Executor():
             if post_service_header is None or post_service_header == '':
                 self.__exception.manage_exception(self.__MSG_PARAM_MUST_BE_PROVIDED.format(self.__CONFIG_FILE_FIELD_CRAWLER_SERVICE_HEADER), True)
 
-            self.__logging.Log("Crawling has started")
+            self.__logging.log("Crawling has started")
             result: ICrawlingResult = self.__crawler.execute(crawling_args)
             
             if result is None:
                 self.__exception.manage_exception("Crawling result cannot be null", True)
                             
             result_obj: dict = result.get_object()
+            result_msg: str = result.get_message()
+            result_status: bool = result.get_crawling_status()
 
-            if result_obj is None:
-                self.__exception.manage_exception("Crawling result object cannot be null", True)
-                
-            self.__logging.Log("Posting result to {0}".format(destination_url))
-            self.__api_controller.post(destination_url, post_service_header, result_obj, post_service_ext_params)
+            self.__logging.log("Crawler message: " + result_msg)
+
+            if result_status is True:            
+                self.__logging.log("Posting result to {0}".format(destination_url))
+                self.__api_controller.post(destination_url, post_service_header, result_obj, post_service_ext_params)
+            else:
+                self.__logging.log("Nothin")
 
             self.__logging.log("DONE HERE! :)")
         except Exception as ex:
-            self.__exception.manage_exception(ex)
+            self.__exception.manage_exception(ex, True)
 
     def check_required_dependencies(self):
         """
         Check whether the required dependencies are instantiated or not
         """
-        self.check_concrete_obj_is_none(self.__exception, type(IException).__class__.__name__)
-        self.check_concrete_obj_is_none(self.__crawler, type(ICrawler).__class__.__name__)
-        self.check_concrete_obj_is_none(self.__logging, type(ILogging).__class__.__name__)
-        self.check_concrete_obj_is_none(self.__crawling_result, type(ICrawlingResult).__class__.__name__)
-        self.check_concrete_obj_is_none(self.__configuration, type(IConfiguration).__class__.__name__)
-        self.check_concrete_obj_is_none(self.__api_controller, type(IApiController).__class__.__name__)
+        self.check_concrete_obj_is_none(self.__exception, IException.__name__)
+        self.check_concrete_obj_is_none(self.__crawler, ICrawler.__name__)
+        self.check_concrete_obj_is_none(self.__logging, ILogging.__name__)
+        self.check_concrete_obj_is_none(self.__crawling_result, ICrawlingResult.__name__)
+        self.check_concrete_obj_is_none(self.__configuration, IConfiguration.__name__)
+        self.check_concrete_obj_is_none(self.__api_controller, IApiController.__name__)
 
-        self.__logging.Log(self.__MSG_LOADED_OBJECT_MSG.format(type(self.__crawler), type(ICrawler).__class__.__name__))
-        self.__logging.Log(self.__MSG_LOADED_OBJECT_MSG.format(type(self.__api_controller), type(IApiController).__class__.__name__))
-        self.__logging.Log(self.__MSG_LOADED_OBJECT_MSG.format(type(self.__configuration), type(IConfiguration).__class__.__name__))
-        self.__logging.Log(self.__MSG_LOADED_OBJECT_MSG.format(type(self.__crawling_result), type(ICrawlingResult).__class__.__name__))
-        self.__logging.Log(self.__MSG_LOADED_OBJECT_MSG.format(type(self.__exception), type(IException).__class__.__name__))
-        self.__logging.Log(self.__MSG_LOADED_OBJECT_MSG.format(type(self.__logging), type(ILogging).__class__.__name__))
+        self.__logging.log(self.__MSG_LOADED_OBJECT_MSG.format(type(self.__crawler), ICrawler.__name__))
+        self.__logging.log(self.__MSG_LOADED_OBJECT_MSG.format(type(self.__api_controller), IApiController.__name__))
+        self.__logging.log(self.__MSG_LOADED_OBJECT_MSG.format(type(self.__configuration), IConfiguration.__name__))
+        self.__logging.log(self.__MSG_LOADED_OBJECT_MSG.format(type(self.__crawling_result), ICrawlingResult.__name__))
+        self.__logging.log(self.__MSG_LOADED_OBJECT_MSG.format(type(self.__exception), IException.__name__))
+        self.__logging.log(self.__MSG_LOADED_OBJECT_MSG.format(type(self.__logging), ILogging.__name__))
 
     def check_concrete_obj_is_none(self, concrete_obj: object, expected_type_name: str):
         """

@@ -16,7 +16,7 @@
     },
     {
         "interface": "sosi_crawler_interfaces.IConfiguration",
-        "implementation": "tests.generic.Configuration",
+        "implementation": "tests.generic.ConfigurationMissingParam",
         "crawler": "Executor"
     },
     {

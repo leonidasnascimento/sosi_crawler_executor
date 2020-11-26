@@ -32,3 +32,16 @@ class test_executor_init_method(unittest.TestCase):
             pass   
         pass
     pass
+
+    def test_should_init_class_successfully(self):
+        """
+        Should successfully initialize the crawler class 
+        """
+        try:
+            Executor('tests/dependecies.json', 'tests/executor_config.json')
+            pass
+        except Exception as ex:
+            self.assertTrue(str(ex).__eq__('Path to dependencies and configuration files is required'))
+            pass   
+        pass
+    pass

@@ -1,1 +1,7 @@
-from tests.generic_exception import LogException
+from tests.generic import (
+    CustomException, 
+    Configuration, 
+    Crawler, 
+    ApiController, 
+    MissingConfiguration, 
+    Log)

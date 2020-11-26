@@ -1,0 +1,7 @@
+[
+    {
+        "interface": "sosi_crawler_interfaces.IException",
+        "implementation": "tests.generic.CustomException",
+        "crawler": "Executor"
+    }
+]

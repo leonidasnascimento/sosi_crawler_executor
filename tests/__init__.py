@@ -3,5 +3,5 @@ from tests.generic import (
     Configuration, 
     Crawler, 
     ApiController, 
-    MissingConfiguration, 
+    ConfigurationMissingParam, 
     Log)

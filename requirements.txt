@@ -24,8 +24,8 @@ requests==2.24.0
 requests-toolbelt==0.9.1
 rfc3986==1.4.0
 six==1.15.0
-sosi-crawler-interfaces==0.1.12
-sosi-crawler-object-factory==0.0.11
+sosi-crawler-interfaces
+sosi-crawler-object-factory
 toml==0.10.1
 tqdm==4.47.0
 twine==3.2.0

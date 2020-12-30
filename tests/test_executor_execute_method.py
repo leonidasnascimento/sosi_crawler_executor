@@ -24,7 +24,7 @@ class test_executor_execute_method(unittest.TestCase):
         
         """
         try:
-            Executor('tests/dependecies_reader_destinarion_url_none_value.json', 'tests/executor_config_missing.json').execute()
+            Executor('tests/dependecies_configuration_missing_param.json', 'dest_url').execute()
             pass
         except Exception as ex:
             self.assertTrue(str(ex).__eq__('The param "dest_url" must be provided'))
@@ -37,7 +37,7 @@ class test_executor_execute_method(unittest.TestCase):
         
         """
         try:
-            Executor('tests/dependecies_reader_crawling_args_none_value.json', 'tests/executor_config_missing.json').execute()
+            Executor('tests/dependecies_configuration_missing_param.json', 'crawler_args').execute()
             pass
         except Exception as ex:
             self.assertTrue(str(ex).__eq__('The param "crawler_args" must be provided'))
@@ -50,7 +50,7 @@ class test_executor_execute_method(unittest.TestCase):
         
         """
         try:
-            Executor('tests/dependecies_reader_post_service_header_none_value.json', 'tests/executor_config_missing.json').execute()
+            Executor('tests/dependecies_configuration_missing_param.json', 'service_header').execute()
             pass
         except Exception as ex:
             self.assertTrue(str(ex).__eq__('The param "service_header" must be provided'))

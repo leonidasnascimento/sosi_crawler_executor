@@ -91,6 +91,9 @@ class ConfigurationMissingParam(IConfiguration):
     """
     Generic class for configuration
     """
+    dest_url: str = ""
+    crawling_args: str = ""
+    service_header: str = ""
 
     def __init__(self):
         super().__init__()
@@ -106,6 +109,18 @@ class ConfigurationMissingParam(IConfiguration):
         :type section_name: str
         :return: void
         """
+
+        self.dest_url = 'teste'
+        self.crawling_args = 'teste'
+        self.service_header = 'teste'
+
+        if(file_path == 'dest_url'):
+            self.dest_url = ''
+        elif(file_path == 'crawler_args'):
+            self.crawling_args = ''
+        elif(file_path == 'service_header'):
+            self.service_header = ''
+
         return
 
     def read(self, field: str, default_value: str = None) -> str: 
@@ -120,7 +135,15 @@ class ConfigurationMissingParam(IConfiguration):
         :default default_value: None
         :return: str
         """
-        return default_value
+
+        if(field == 'dest_url'):
+            return self.dest_url
+        elif(field == 'crawler_args'):
+            return self.crawling_args
+        elif(field == 'service_header'):
+            return self.service_header
+        else:
+            return default_value
 
 class CrawlingResult(ICrawlingResult):
     """

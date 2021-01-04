@@ -72,7 +72,20 @@ class test_executor_execute_method(unittest.TestCase):
         pass
     pass
 
-    def test_should_execute_crawler_successfully(self):
+    def test_should_execute_crawler_successfully_not_posting_to_service(self):
+        """
+        
+        """
+        try:
+            Executor('tests/dependecies_result_status_false.json', 'tests/executor_config.json').execute()
+            pass
+        except Exception as ex:
+            self.assertTrue(False)
+            pass 
+        pass
+    pass
+
+    def test_should_execute_crawler_successfully_posting_to_service(self):
         """
         
         """

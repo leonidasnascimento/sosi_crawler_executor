@@ -39,3 +39,20 @@ class test_executor_check_concrete_obj_is_none_method(unittest.TestCase):
             self.assertTrue(False)
         pass
     pass
+
+    def test_should_raise_value_error_through_custom_class(self):
+        """
+        
+        """
+        try:
+            obj: Executor = Executor('tests/dependecies_missing_exception.json', 'crawler_obj')
+            obj.check_concrete_obj_is_none(None, type(str).__class__.__name__)
+
+            self.assertTrue(True)
+            pass
+        except ValueError:
+            self.assertTrue(True)
+        except Exception:
+            self.assertTrue(False)
+        pass
+    pass

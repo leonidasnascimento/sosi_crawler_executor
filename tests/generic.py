@@ -50,7 +50,28 @@ class Crawler(ICrawler):
         :param args: Set of arguments needed to run the crawler object
         :type args: dict
         """
-        return type('crawler_result', (ICrawlingResult,), {})
+
+        return_value: ICrawlingResult = CrawlingResult()
+        return_value.set_result("", True, {})
+
+        return return_value
+    
+class CrawlerStatusFalse(ICrawler):
+    """
+    Generic class for crawling
+    """
+
+    def __init__(self):
+        super().__init__()
+    
+    def execute(self, args: dict) -> ICrawlingResult:
+        """
+        Main method for a crawling object
+
+        :param args: Set of arguments needed to run the crawler object
+        :type args: dict
+        """
+        return CrawlingResult()
 
 class CrawlerNoneResultObj(ICrawler):
     """

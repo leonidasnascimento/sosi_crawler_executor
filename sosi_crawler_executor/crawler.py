@@ -100,9 +100,9 @@ class Executor():
                 self.__logging.log("Posting result to {0}".format(destination_url))
                 self.__api_controller.post(destination_url, post_service_header, result_obj, post_service_ext_params)
             else:
-                self.__logging.log("Nothin")
+                self.__logging.log("====== Nothing to post for this crawler ======")
 
-            self.__logging.log("DONE HERE! :)")
+            self.__logging.log("====== DONE HERE! :) ======")
         except Exception as ex:
             self.__exception.manage_exception(ex, True)
 

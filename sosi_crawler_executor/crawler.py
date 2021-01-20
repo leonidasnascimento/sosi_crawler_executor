@@ -1,10 +1,10 @@
-from sosi_crawler_interfaces.IApiController import IApiController
 from sosi_crawler_interfaces.IConfiguration import IConfiguration
 from sosi_crawler_interfaces.ICrawler import ICrawler
 from sosi_crawler_interfaces.ICrawlingResult import ICrawlingResult
 from sosi_crawler_interfaces.IException import IException
 from sosi_crawler_interfaces.ILogging import ILogging
 from sosi_crawler_interfaces.IObjectFactory import IObjectFactory
+from sosi_crawler_interfaces.IMessageQueue import IMessageQueue
 from sosi_crawler_object_factory.factory import ObjectFactory
 
 class Executor():
@@ -16,7 +16,7 @@ class Executor():
     ## Global variables
     __object_factory: IObjectFactory = None
     __crawler: ICrawler = None
-    __api_controller: IApiController = None
+    __message_queue: IMessageQueue = None
     __configuration: IConfiguration = None
     __crawler: ICrawler = None
     __crawling_result: ICrawlingResult = None
@@ -29,10 +29,9 @@ class Executor():
     __MSG_CONCRETE_OBJ_REQUIRED: str = 'A concrete object for "{0}" is required. This crawler cannot run'
     __MSG_PARAM_MUST_BE_PROVIDED: str = 'The param "{0}" must be provided'
     __CONFIG_FILE_FIELD_CRAWLER: str = 'crawler'
-    __CONFIG_FILE_FIELD_DEST_URL: str = 'dest_url'
+    __CONFIG_FILE_FIELD_MSG_QUEUE_TARGET_TOPIC: str = 'msg_queue_target_topic'
+    __CONFIG_FILE_FIELD_MSG_QUEUE_TARGET_ERROR_TOPIC: str = 'msg_queue_target_error_topic'
     __CONFIG_FILE_FIELD_CRAWLER_ARGS: str = 'crawler_args'
-    __CONFIG_FILE_FIELD_CRAWLER_SERVICE_HEADER: str = 'service_header'
-    __CONFIG_FILE_FIELD_SERVICE_EXT_ARGS: str = 'service_extra_args'
     __MSG_INIT_PARAMS_REQUIRED: str = 'Path to dependencies and configuration files is required'
 
     def __init__(self, dependecies_file_path: str, crawler_config_file_path: str):
@@ -56,7 +55,7 @@ class Executor():
         self.__object_factory.load_dependencies(dependecies_file_path)
 
         self.__crawler = self.__object_factory.get_instance(self.__class__.__name__, ICrawler)
-        self.__api_controller = self.__object_factory.get_instance(self.__class__.__name__, IApiController)
+        self.__message_queue = self.__object_factory.get_instance(self.__class__.__name__, IMessageQueue)
         self.__configuration = self.__object_factory.get_instance(self.__class__.__name__, IConfiguration)
         self.__crawling_result = self.__object_factory.get_instance(self.__class__.__name__, ICrawlingResult)
         self.__exception = self.__object_factory.get_instance(self.__class__.__name__, IException)
@@ -70,20 +69,19 @@ class Executor():
         try:
             self.check_required_dependencies()
             self.__configuration.load(self.__crawler_config_file_path, self.__CONFIG_FILE_FIELD_CRAWLER)
-            destination_url: str = self.__configuration.read(self.__CONFIG_FILE_FIELD_DEST_URL, None)
+            msg_queue_target_topic: str = self.__configuration.read(self.__CONFIG_FILE_FIELD_MSG_QUEUE_TARGET_TOPIC, None)
+            msg_queue_target_error_topic: str = self.__configuration.read(self.__CONFIG_FILE_FIELD_MSG_QUEUE_TARGET_ERROR_TOPIC, None)     
             crawling_args: dict = self.__configuration.read(self.__CONFIG_FILE_FIELD_CRAWLER_ARGS, None)
-            post_service_header: dict = self.__configuration.read(self.__CONFIG_FILE_FIELD_CRAWLER_SERVICE_HEADER, None)
-            post_service_ext_params: dict = self.__configuration.read(self.__CONFIG_FILE_FIELD_SERVICE_EXT_ARGS, None)
 
-            if destination_url is None or destination_url == '':
-                self.__exception.manage_exception(self.__MSG_PARAM_MUST_BE_PROVIDED.format(self.__CONFIG_FILE_FIELD_DEST_URL), True)
+            if msg_queue_target_topic is None or msg_queue_target_topic == '':
+                self.__exception.manage_exception(self.__MSG_PARAM_MUST_BE_PROVIDED.format(self.__CONFIG_FILE_FIELD_MSG_QUEUE_TARGET_TOPIC), True)
+
+            if msg_queue_target_error_topic is None or msg_queue_target_error_topic == '':
+                self.__exception.manage_exception(self.__MSG_PARAM_MUST_BE_PROVIDED.format(self.__CONFIG_FILE_FIELD_MSG_QUEUE_TARGET_ERROR_TOPIC), True)
             
             if crawling_args is None or crawling_args == '':
                 self.__exception.manage_exception(self.__MSG_PARAM_MUST_BE_PROVIDED.format(self.__CONFIG_FILE_FIELD_CRAWLER_ARGS), True)
             
-            if post_service_header is None or post_service_header == '':
-                self.__exception.manage_exception(self.__MSG_PARAM_MUST_BE_PROVIDED.format(self.__CONFIG_FILE_FIELD_CRAWLER_SERVICE_HEADER), True)
-
             self.__logging.log("Crawling has started")
             result: ICrawlingResult = self.__crawler.execute(crawling_args)
             
@@ -97,10 +95,11 @@ class Executor():
             self.__logging.log("Crawler message: " + result_msg)
 
             if result_status is True:            
-                self.__logging.log("Posting result to {0}".format(destination_url))
-                self.__api_controller.post(destination_url, post_service_header, result_obj, post_service_ext_params)
+                self.__logging.log("Publishing result to {0}".format(msg_queue_target_topic))
+                self.__message_queue.publish(msg_queue_target_topic, result_obj)
             else:
-                self.__logging.log("====== Nothing to post for this crawler ======")
+                self.__logging.log(result_msg)
+                self.__message_queue.publish(msg_queue_target_error_topic, result_obj)
 
             self.__logging.log("====== DONE HERE! :) ======")
         except Exception as ex:
@@ -115,10 +114,10 @@ class Executor():
         self.check_concrete_obj_is_none(self.__logging, ILogging.__name__)
         self.check_concrete_obj_is_none(self.__crawling_result, ICrawlingResult.__name__)
         self.check_concrete_obj_is_none(self.__configuration, IConfiguration.__name__)
-        self.check_concrete_obj_is_none(self.__api_controller, IApiController.__name__)
+        self.check_concrete_obj_is_none(self.__message_queue, IMessageQueue.__name__)
 
         self.__logging.log(self.__MSG_LOADED_OBJECT_MSG.format(type(self.__crawler), ICrawler.__name__))
-        self.__logging.log(self.__MSG_LOADED_OBJECT_MSG.format(type(self.__api_controller), IApiController.__name__))
+        self.__logging.log(self.__MSG_LOADED_OBJECT_MSG.format(type(self.__message_queue), IMessageQueue.__name__))
         self.__logging.log(self.__MSG_LOADED_OBJECT_MSG.format(type(self.__configuration), IConfiguration.__name__))
         self.__logging.log(self.__MSG_LOADED_OBJECT_MSG.format(type(self.__crawling_result), ICrawlingResult.__name__))
         self.__logging.log(self.__MSG_LOADED_OBJECT_MSG.format(type(self.__exception), IException.__name__))

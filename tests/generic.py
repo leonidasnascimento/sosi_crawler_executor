@@ -5,6 +5,7 @@ from sosi_crawler_interfaces.ICrawler import ICrawler
 from sosi_crawler_interfaces.ICrawlingResult import ICrawlingResult
 from sosi_crawler_interfaces.ILogging import ILogging
 from sosi_crawler_interfaces.IDataRepository import IDataRepository
+from sosi_crawler_interfaces.IMessageQueue import IMessageQueue
 from typing import Optional
 
 class CustomException(IException):
@@ -129,8 +130,8 @@ class ConfigurationMissingParam(IConfiguration):
     """
     Generic class for configuration
     """
-    dest_url: str = ""
-    crawling_args: str = ""
+    msg_queue_target_topic: str = ""
+    msg_queue_target_error_topic: str = ""
     service_header: str = ""
 
     def __init__(self):
@@ -148,16 +149,16 @@ class ConfigurationMissingParam(IConfiguration):
         :return: void
         """
 
-        self.dest_url = 'teste'
-        self.crawling_args = 'teste'
-        self.service_header = 'teste'
+        self.msg_queue_target_topic = 'msg_queue_target_topic'
+        self.msg_queue_target_error_topic = 'msg_queue_target_error_topic'
+        self.crawling_args = 'crawling_args'
 
-        if(file_path == 'dest_url'):
-            self.dest_url = ''
-        elif(file_path == 'crawler_args'):
+        if(file_path == 'msg_queue_target_topic'):
+            self.msg_queue_target_topic = ''
+        elif(file_path == 'msg_queue_target_error_topic'):
+            self.msg_queue_target_error_topic = ''
+        elif(file_path == 'crawling_args'):
             self.crawling_args = ''
-        elif(file_path == 'service_header'):
-            self.service_header = ''
 
         return
 
@@ -174,12 +175,12 @@ class ConfigurationMissingParam(IConfiguration):
         :return: str
         """
 
-        if(field == 'dest_url'):
-            return self.dest_url
-        elif(field == 'crawler_args'):
+        if(field == 'msg_queue_target_topic'):
+            return self.msg_queue_target_topic
+        elif(field == 'msg_queue_target_error_topic'):
+            return self.msg_queue_target_error_topic
+        elif(field == 'crawling_args'):
             return self.crawling_args
-        elif(field == 'service_header'):
-            return self.service_header
         else:
             return default_value
 
@@ -191,82 +192,32 @@ class CrawlingResult(ICrawlingResult):
     def __init__(self):
         super().__init__()
 
-class ApiController(IApiController):
+class MessageQueue(IMessageQueue):
     """
-    Generic class for Api Controller
+    Generic class for Message Queue
     """
 
     def __init__(self):
         super().__init__()
     
-    def post(self, url: str, header: object, data: object, param: Optional[object]) -> str:
+    def publish(self, topic: str, message: dict):
         """
-        Post data to an URL
+        Publish a message to a given topic
 
-        :param url: Target URL
-        :param header: HTTP Headers
-        :param data: Data to be sent to the target URL
-        :param param: Extra parameters to be sent to the target server
-
-        :type url: str
-        :type header: object
-        :type data: object
-        :type param: Optional[object]
-
-        :return: str
+        :param topic: Target topic name
+        :param message: Object representing the JSON message to be sent to the topic. NOTE: This will be parsed to JSON.
+        :type topic: str
+        :type message: dict
         """
-        return "test-posted"
+        pass
 
-    def get(self, url: str, header: object, data: object, param: Optional[object]) -> str:
+    def consume(self, topic: str) -> dict:
         """
-        Get data from an URL
+        Consume a message from a topic queue
 
-        :param url: Target URL
-        :param header: HTTP Headers
-        :param data: Data to be sent to the target URL
-        :param param: Extra parameters to be sent to the target server
-
-        :type url: str
-        :type header: object
-        :type data: object
-        :type param: Optional[object]
-
-        :return: str
+        :param topic: Target topic name
+        :type topic: str
+        :return: dict
         """
-        return "test-gotten"
-
-    def put(self, url: str, header: object, data: object, param: Optional[object]) -> str:
-        """
-        Put some data to an URL
-
-        :param url: Target URL
-        :param header: HTTP Headers
-        :param data: Data to be sent to the target URL
-        :param param: Extra parameters to be sent to the target server
-
-        :type url: str
-        :type header: object
-        :type data: object
-        :type param: Optional[object]
-
-        :return: str
-        """
-        return "test-put"
-
-    def delete(self, url: str, header: object, data: object, param: Optional[object]) -> str:
-        """
-        Delete data present into a repository (URL)
-
-        :param url: Target URL
-        :param header: HTTP Headers
-        :param data: Data to be sent to the target URL
-        :param param: Extra parameters to be sent to the target server
-
-        :type url: str
-        :type header: object
-        :type data: object
-        :type param: Optional[object]
-
-        :return: str
-        """
-        return "test-deleted"
+        pass
+    

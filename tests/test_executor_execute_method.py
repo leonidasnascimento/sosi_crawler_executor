@@ -20,41 +20,41 @@ class test_executor_execute_method(unittest.TestCase):
         pass
     pass
 
-    def test_should_raise_exception_for_missing_destination_url(self):
+    def test_should_raise_exception_for_missing_msg_queue_target_error_topic(self):
         """
-        Should raise exception given a missing "destination url" parameter (empty or none)
+        Should raise exception given a missing "Error Topic" parameter (empty or none)
         """
         try:
-            Executor('tests/dependecies_configuration_missing_param.json', 'dest_url').execute()
+            Executor('tests/dependecies_configuration_missing_param.json', 'msg_queue_target_error_topic').execute()
             pass
         except Exception as ex:
-            self.assertTrue(str(ex).__eq__('The param "dest_url" must be provided'))
+            self.assertTrue(str(ex).__eq__('The param "msg_queue_target_error_topic" must be provided'))
+            pass 
+        pass
+    pass
+
+    def test_should_raise_exception_for_missing_msg_queue_target_topic(self):
+        """
+        Should raise exception given a missing "Target Topic" parameter (empty or none)
+        """
+        try:
+            Executor('tests/dependecies_configuration_missing_param.json', 'msg_queue_target_topic').execute()
+            pass
+        except Exception as ex:
+            self.assertTrue(str(ex).__eq__('The param "msg_queue_target_topic" must be provided'))
             pass 
         pass
     pass
 
     def test_should_raise_exception_for_missing_crawling_args(self):
         """
-        Should raise exception given a missing "crawler args" parameter (empty or none)
+        Should raise exception given a missing "Crawling Args" parameter (empty or none)
         """
         try:
-            Executor('tests/dependecies_configuration_missing_param.json', 'crawler_args').execute()
+            Executor('tests/dependecies_configuration_missing_param.json', 'crawling_args').execute()
             pass
         except Exception as ex:
             self.assertTrue(str(ex).__eq__('The param "crawler_args" must be provided'))
-            pass 
-        pass
-    pass
-
-    def test_should_raise_exception_for_missing_post_service_header(self):
-        """
-        Should raise exception given a missing "service header" parameter (empty or none)
-        """
-        try:
-            Executor('tests/dependecies_configuration_missing_param.json', 'service_header').execute()
-            pass
-        except Exception as ex:
-            self.assertTrue(str(ex).__eq__('The param "service_header" must be provided'))
             pass 
         pass
     pass

@@ -20,8 +20,8 @@
         "crawler": "Executor"
     },
     {
-        "interface": "sosi_crawler_interfaces.IApiController",
-        "implementation": "tests.generic.ApiController",
+        "interface": "sosi_crawler_interfaces.IMessageQueue",
+        "implementation": "tests.generic.MessageQueue",
         "crawler": "Executor"
     },
     {

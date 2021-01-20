@@ -4,6 +4,6 @@ from tests.generic import (
     Crawler,
     CrawlerStatusFalse, 
     CrawlerNoneResultObj,
-    ApiController, 
+    MessageQueue, 
     ConfigurationMissingParam,
     Log)
